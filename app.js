@@ -1,12 +1,15 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
+const _ = require("lodash");
 const app = express();
 
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
-mongoose.connect("mongodb://localhost:27017/todolistDB");
+mongoose.connect(
+  "mongodb+srv://abroderickMongo:Daffodil2018MongoDB@cluster0.xg2ms.mongodb.net/todolistDB"
+);
 
 const day = new Date().toLocaleString(undefined, {
   weekday: "long",
@@ -59,8 +62,8 @@ app.get("/", async function (req, res) {
   });
 });
 
-app.get("/:newListRoute", function (req, res) {
-  const existingUserRoute = req.params.newListRoute;
+app.get("/UserList/:newListRoute", function (req, res) {
+  const existingUserRoute = _.capitalize(req.params.newListRoute);
   let userCreatedList;
 
   UserList.findOne({ name: existingUserRoute }, function (err, listFound) {
@@ -77,7 +80,7 @@ app.get("/:newListRoute", function (req, res) {
       console.log(userCreatedList.name + " created.");
     } else {
       userCreatedList = listFound;
-      console.log(userCreatedList.name + " has been found!");
+      console.log("Found " + userCreatedList.name);
     }
     res.render("list", {
       listTitle: existingUserRoute,
@@ -108,14 +111,31 @@ app.post("/", function (req, res) {
 
 app.post("/delete", function (req, res) {
   const checkItemId = req.body.checkbox;
-  Item.findByIdAndRemove(checkItemId, function (err) {
-    if (err) {
-      console.log(err);
-    } else {
-      console.log(checkItemId + " removed successfully.");
-      res.redirect("/");
-    }
-  });
+  const checkWhichList = req.body.whichList;
+
+  if (checkWhichList === "Home") {
+    Item.findByIdAndRemove(checkItemId, function (err) {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log(checkItemId + " removed successfully.");
+        res.redirect("/");
+      }
+    });
+  } else {
+    UserList.findOneAndUpdate(
+      { name: checkWhichList },
+      { $pull: { items: { _id: checkItemId } } },
+      function (err, listFound) {
+        if (err) {
+          console.log(err);
+        } else {
+          res.redirect("/" + checkWhichList);
+          console.log("Item deleted from " + listFound.name);
+        }
+      }
+    );
+  }
 });
 
 app.listen(3000, function () {
