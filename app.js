@@ -138,8 +138,13 @@ app.post("/delete", function (req, res) {
   }
 });
 
-app.listen(3000, function () {
-  console.log("Ship docked at port 3000");
+let port = process.env.PORT;
+if (port == null || port == "") {
+  port = 3000;
+}
+
+app.listen(port, function () {
+  console.log("Server service has been served.");
 });
 
 // Create code that, whenever an item is crossed off, put a subheading at the top
