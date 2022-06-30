@@ -44,7 +44,9 @@ async function findAllItems() {
 }
 
 app.get("/", async function (req, res) {
+  console.log("in get handler");
   let toDoListItems = await findAllItems();
+  console.log("items: ", toDoListItems);
   if (toDoListItems.length === 0) {
     Item.insertMany(defaultItems, function (err) {
       if (err) {
@@ -55,6 +57,8 @@ app.get("/", async function (req, res) {
       }
     });
   }
+  console.log("after insert");
+
   res.render("list", {
     listTitle: day,
     newListItems: toDoListItems,
@@ -138,6 +142,7 @@ app.post("/delete", function (req, res) {
   }
 });
 
+// eslint-disable-next-line no-undef
 let port = process.env.PORT;
 if (port == null || port == "") {
   port = 3000;
