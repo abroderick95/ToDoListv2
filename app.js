@@ -63,7 +63,11 @@ app.get("/", async function (req, res) {
   });
 });
 
-app.get("/UserList/:newListRoute", function (req, res) {
+app.get("/favicon.ico", function (req, res) {
+  res.end();
+});
+
+app.get("/:newListRoute", function (req, res) {
   const existingUserRoute = _.capitalize(req.params.newListRoute);
   let userCreatedList;
 
